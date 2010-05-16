@@ -17,6 +17,16 @@ newtype SortedAList k v = SortedAList [(k, v)]
 fromSortedAList :: SortedAList k v -> [(k, v)]
 fromSortedAList (SortedAList xs) = xs
 
+removeDuplicates (SortedAList xs) = SortedAList $ foldr removeDuplicate [] xs
+    where removeDuplicate x@(k, _) ys@(y@(k', _) : _) | k == k' = ys
+                                                      | otherwise = x : ys
+          removeDuplicate x _ = [x]
+
+removeDuplicates' (SortedAList xs) = SortedAList $ foldr removeDuplicate [] xs
+    where removeDuplicate x@(k, _) ys@(y@(k', _) : ys') | k == k' = x : ys'
+                                                        | otherwise = x : ys
+          removeDuplicate x _ = [x]
+
 instance Ord a => AssociativeContainer (SortedAList a b) a b where
     toAList = fromSortedAList
     fromAList = SortedAList . L.sortBy (compare `on` fst)
@@ -30,10 +40,14 @@ instance Ord a => AssociativeContainer (SortedAList a b) a b where
           unlist = msum . map (return . snd)
           range = takeWhile equals . dropWhile (not . equals)
           equals (k', _) = k == k'
+    remove k (SortedAList m) = SortedAList (lower ++ upper)
+        where
+          (lower, upper') = break equals m
+          upper = dropWhile equals upper'
+          equals (k', _) = k == k'
     merge (SortedAList x) (SortedAList y) = SortedAList (merge' x y)
         where
           merge' xs@(x@(k1, _) : xs') ys@(y@(k2, _) : ys') | k1 <= k2 = x : merge' xs' ys
                                                            | otherwise = y : merge' xs ys'
           merge' _ ys = ys
-
 

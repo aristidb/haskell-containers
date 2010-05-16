@@ -9,6 +9,7 @@ module AssociativeContainer
 , empty
 , null
 , lookup
+, remove
 , merge
 , mergeAList
 )
@@ -26,6 +27,7 @@ class Eq k => AssociativeContainer a k v | a -> k v where
     empty :: a
     null :: a -> Bool
     lookup :: (MonadPlus t) => k -> a -> t v
+    remove :: k -> a -> a
     merge :: a -> a -> a
     mergeAList :: [(k, v)] -> a -> a
     mergeAList = merge . fromAList
@@ -38,6 +40,7 @@ instance Eq a => AssociativeContainer [(a, b)] a b where
     insert = (:)
     lookup k = msum . map check
         where check (k', v) = guard (k == k') >> return v
+    remove k = filter (\(k', _) -> k /= k')
     merge = (++)
 
 instance Ord a => AssociativeContainer (M.Map a b) a b where
@@ -49,4 +52,5 @@ instance Ord a => AssociativeContainer (M.Map a b) a b where
     lookup k m = unmaybe $ M.lookup k m
         where unmaybe Nothing = mzero
               unmaybe (Just a) = return a
+    remove = M.delete
     merge = M.union
