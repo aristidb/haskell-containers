@@ -9,7 +9,7 @@ where
 import Control.Monad
 import qualified Data.Map as M
 
-class Eq k => AssociativeContainer a k v | a -> k, a -> v where
+class Eq k => AssociativeContainer a k v | a -> k v where
     toAList :: a -> [(k, v)]
     fromAList :: [(k, v)] -> a
     insert :: (k, v) -> a -> a
