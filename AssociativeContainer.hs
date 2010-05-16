@@ -2,10 +2,20 @@
 
 module AssociativeContainer
 (
- AssociativeContainer
+  AssociativeContainer
+, toAList
+, fromAList
+, insert
+, empty
+, null
+, lookup
+, merge
+, mergeAList
 )
 where
 
+import Prelude hiding (lookup, null)
+import qualified Prelude
 import Control.Monad
 import qualified Data.Map as M
 
@@ -30,7 +40,7 @@ instance Eq a => AssociativeContainer [(a, b)] a b where
         where check (k', v) = guard (k == k') >> return v
     merge = (++)
 
-instance (Eq a, Ord a) => AssociativeContainer (M.Map a b) a b where
+instance Ord a => AssociativeContainer (M.Map a b) a b where
     fromAList = M.fromList
     toAList = M.toList
     insert = uncurry M.insert
