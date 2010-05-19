@@ -38,13 +38,11 @@ instance Ord a => AssociativeContainer (SortedAList a b) a b where
     lookup k = unlist . range . fromSortedAList
         where 
           unlist = msum . map (return . snd)
-          range = takeWhile equals . dropWhile (not . equals)
-          equals (k', _) = k == k'
+          range = takeWhile (keyEquals k) . dropWhile (keyNotEquals k)
     remove k (SortedAList m) = SortedAList (lower ++ upper)
         where
-          (lower, upper') = break equals m
-          upper = dropWhile equals upper'
-          equals (k', _) = k == k'
+          (lower, upper') = break (keyEquals k) m
+          upper = dropWhile (keyEquals k) upper'
     merge (SortedAList x) (SortedAList y) = SortedAList (merge' x y)
         where
           merge' xs@(x@(k1, _) : xs') ys@(y@(k2, _) : ys') | k1 <= k2 = x : merge' xs' ys

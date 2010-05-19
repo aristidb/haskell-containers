@@ -40,7 +40,7 @@ instance Eq a => AssociativeContainer [(a, b)] a b where
     insert = (:)
     lookup k = msum . map check
         where check (k', v) = guard (k == k') >> return v
-    remove k = filter (\(k', _) -> k /= k')
+    remove k = filter (keyNotEquals k)
     merge = (++)
 
 instance Ord a => AssociativeContainer (M.Map a b) a b where
@@ -49,8 +49,9 @@ instance Ord a => AssociativeContainer (M.Map a b) a b where
     insert = uncurry M.insert
     empty = M.empty
     null = M.null
-    lookup k m = unmaybe $ M.lookup k m
-        where unmaybe Nothing = mzero
-              unmaybe (Just a) = return a
+    lookup k m = maybe mzero return (M.lookup k m)
     remove = M.delete
     merge = M.union
+
+keyEquals k (k', _) = k == k'
+keyNotEquals k = not . (keyEquals k)
